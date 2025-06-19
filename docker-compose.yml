@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: collabnest-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    environment:
+      - MONGO_INITDB_DATABASE=collabnest
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - collabnest-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: collabnest-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - collabnest-network
+
+  # Redis Commander (optional - Redis GUI)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: collabnest-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    profiles:
+      - tools
+    networks:
+      - collabnest-network
+
+  # Mongo Express (optional - MongoDB GUI)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: collabnest-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    depends_on:
+      - mongodb
+    profiles:
+      - tools
+    networks:
+      - collabnest-network
+
+volumes:
+  mongo-data:
+    name: collabnest-mongo-data
+  mongo-config:
+    name: collabnest-mongo-config
+  redis-data:
+    name: collabnest-redis-data
+
+networks:
+  collabnest-network:
+    name: collabnest-network
+    driver: bridge
