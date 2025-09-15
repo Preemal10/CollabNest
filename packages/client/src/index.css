@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  * {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  body {
+    @apply antialiased;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  /* Button variants */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg
+           transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700
+           focus:ring-primary-500 dark:focus:ring-offset-gray-900;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200
+           dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700
+           focus:ring-gray-500;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-gray-600 hover:bg-gray-100
+           dark:text-gray-300 dark:hover:bg-gray-800
+           focus:ring-gray-500;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700
+           focus:ring-red-500;
+  }
+
+  /* Input styles */
+  .input {
+    @apply block w-full px-3 py-2 text-sm rounded-lg border
+           bg-white dark:bg-gray-800
+           border-gray-300 dark:border-gray-600
+           placeholder-gray-400 dark:placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-error {
+    @apply input border-red-500 focus:ring-red-500;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-card
+           border border-gray-200 dark:border-gray-700;
+  }
+
+  .card-hover {
+    @apply card transition-shadow duration-150 hover:shadow-card-hover;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary-100 text-primary-700
+           dark:bg-primary-900/30 dark:text-primary-400;
+  }
+
+  .badge-success {
+    @apply badge bg-green-100 text-green-700
+           dark:bg-green-900/30 dark:text-green-400;
+  }
+
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-700
+           dark:bg-yellow-900/30 dark:text-yellow-400;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 text-red-700
+           dark:bg-red-900/30 dark:text-red-400;
+  }
+
+  /* Link styles */
+  .link {
+    @apply text-primary-600 hover:text-primary-700 dark:text-primary-400
+           dark:hover:text-primary-300 underline-offset-4 hover:underline;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Kanban column styling */
+  .kanban-column {
+    @apply flex flex-col min-h-[200px] max-h-[calc(100vh-200px)]
+           bg-gray-100 dark:bg-gray-800/50 rounded-lg;
+  }
+
+  /* Task card styling */
+  .task-card {
+    @apply card-hover cursor-grab active:cursor-grabbing
+           select-none touch-none;
+  }
+
+  .task-card-dragging {
+    @apply opacity-50 ring-2 ring-primary-500;
+  }
+
+  /* Dropdown menu */
+  .dropdown-item {
+    @apply flex items-center w-full px-3 py-2 text-sm text-left
+           text-gray-700 dark:text-gray-200
+           hover:bg-gray-100 dark:hover:bg-gray-700
+           first:rounded-t-lg last:rounded-b-lg;
+  }
+
+  /* Truncate multiple lines */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
