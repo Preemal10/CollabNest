@@ -8,10 +8,12 @@ import {
   ViewColumnsIcon,
   ClockIcon,
   CheckCircleIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAppDispatch, useAppSelector } from '@/hooks/useStore';
 import { fetchProject } from '@/features/projects/projectsSlice';
-import { fetchBoardsByProject } from '@/features/boards/boardsSlice';
+import { fetchBoardsByProject, createBoard } from '@/features/boards/boardsSlice';
+import InviteMemberModal from '@/components/InviteMemberModal';
 
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -23,7 +25,11 @@ export default function ProjectPage() {
   );
   const { boards, isLoading: boardsLoading } = useAppSelector((state) => state.boards);
 
-  const [_showCreateBoard, setShowCreateBoard] = useState(false);
+  const [showCreateBoard, setShowCreateBoard] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [newBoardName, setNewBoardName] = useState('');
+  const [newBoardDescription, setNewBoardDescription] = useState('');
+  const [isCreatingBoard, setIsCreatingBoard] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -31,6 +37,30 @@ export default function ProjectPage() {
       dispatch(fetchBoardsByProject(projectId));
     }
   }, [projectId, dispatch]);
+
+  const handleCreateBoard = async () => {
+    if (!newBoardName.trim() || !projectId) return;
+
+    setIsCreatingBoard(true);
+    try {
+      const result = await dispatch(createBoard({
+        name: newBoardName.trim(),
+        description: newBoardDescription.trim() || undefined,
+        projectId,
+      })).unwrap();
+      
+      setShowCreateBoard(false);
+      setNewBoardName('');
+      setNewBoardDescription('');
+      
+      // Navigate to the new board
+      navigate(`/projects/${projectId}/boards/${result._id}`);
+    } catch (error) {
+      console.error('Failed to create board:', error);
+    } finally {
+      setIsCreatingBoard(false);
+    }
+  };
 
   const isLoading = projectLoading || boardsLoading;
 
@@ -82,7 +112,10 @@ export default function ProjectPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="btn-ghost">
+          <button 
+            className="btn-ghost"
+            onClick={() => setShowInviteModal(true)}
+          >
             <UserPlusIcon className="w-5 h-5 mr-2" />
             Invite
           </button>
@@ -230,6 +263,79 @@ export default function ProjectPage() {
           </div>
         </div>
       </div>
+
+      {/* Create Board Modal */}
+      {showCreateBoard && (
+        <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Create New Board</h3>
+              <button
+                onClick={() => setShowCreateBoard(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Board Name *
+                </label>
+                <input
+                  type="text"
+                  value={newBoardName}
+                  onChange={(e) => setNewBoardName(e.target.value)}
+                  placeholder="Enter board name"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-white"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newBoardName.trim()) handleCreateBoard();
+                    if (e.key === 'Escape') setShowCreateBoard(false);
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={newBoardDescription}
+                  onChange={(e) => setNewBoardDescription(e.target.value)}
+                  placeholder="Optional description"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-white resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => setShowCreateBoard(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateBoard}
+                disabled={!newBoardName.trim() || isCreatingBoard}
+                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
+              >
+                {isCreatingBoard ? 'Creating...' : 'Create Board'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Member Modal */}
+      {projectId && (
+        <InviteMemberModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          projectId={projectId}
+          onMemberAdded={() => dispatch(fetchProject(projectId))}
+        />
+      )}
     </div>
   );
 }

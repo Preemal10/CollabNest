@@ -90,29 +90,8 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Preview placeholder */}
-          <div className="mt-24">
-            <div className="card p-4">
-              <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-gray-400">Board Preview Coming Soon</p>
-              </div>
-            </div>
-          </div>
         </div>
-
-        {/* Footer */}
-        <footer className="border-t border-gray-200 dark:border-gray-800 mt-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <p className="text-gray-500 text-sm">
-                CollabNest - Real-Time Collaborative Project Management
-              </p>
-              <p className="text-gray-400 text-sm">
-                Built with React, TypeScript, and Node.js
-              </p>
-            </div>
-          </div>
-        </footer>
+      
       </main>
     </div>
   );

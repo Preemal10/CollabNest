@@ -35,9 +35,10 @@ const labelColors = [
 
 interface TaskDetailModalProps {
   columnId?: string; // For creating new task
+  onClose?: () => void; // Callback when modal closes
 }
 
-export default function TaskDetailModal({ columnId }: TaskDetailModalProps) {
+export default function TaskDetailModal({ columnId, onClose }: TaskDetailModalProps) {
   const dispatch = useAppDispatch();
   const { isTaskModalOpen, selectedTask, currentBoard } = useAppSelector(
     (state) => state.boards
@@ -90,6 +91,7 @@ export default function TaskDetailModal({ columnId }: TaskDetailModalProps) {
     setLabels([]);
     setShowLabelInput(false);
     setSelectedTab(0);
+    onClose?.();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

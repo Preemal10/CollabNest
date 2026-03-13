@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import type { Board, Column, CreateTaskPayload, UpdateTaskPayload, MoveTaskPayload } from '@collabnest/shared';
+import type { Board, Column, CreateTaskPayload, UpdateTaskPayload, MoveTaskPayload, CreateBoardPayload } from '@collabnest/shared';
 import { boardsApi, tasksApi } from '@/services/api';
 
 // Task type from API (with populated fields)
@@ -150,6 +150,18 @@ export const addColumn = createAsyncThunk(
       return response.board;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to add column');
+    }
+  }
+);
+
+export const createBoard = createAsyncThunk(
+  'boards/createBoard',
+  async (payload: CreateBoardPayload, { rejectWithValue }) => {
+    try {
+      const response = await boardsApi.create(payload);
+      return response.board;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to create board');
     }
   }
 );
@@ -380,6 +392,21 @@ const boardsSlice = createSlice({
         state.currentBoard = action.payload;
       })
       .addCase(addColumn.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    // Create board
+    builder
+      .addCase(createBoard.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createBoard.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.boards.push(action.payload);
+      })
+      .addCase(createBoard.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.payload as string;
       });
   },

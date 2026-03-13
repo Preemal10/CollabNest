@@ -4,12 +4,14 @@ import {
   ArrowLeftIcon,
   Cog6ToothIcon,
   UserPlusIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAppDispatch, useAppSelector } from '@/hooks/useStore';
 import { fetchBoardWithTasks, addColumn } from '@/features/boards/boardsSlice';
 import { fetchProject } from '@/features/projects/projectsSlice';
 import KanbanBoard from '@/components/board/KanbanBoard';
 import TaskDetailModal from '@/components/board/TaskDetailModal';
+import InviteMemberModal from '@/components/InviteMemberModal';
 import { joinBoard, leaveBoard } from '@/services/socket';
 
 export default function BoardPage() {
@@ -25,6 +27,8 @@ export default function BoardPage() {
   const [newTaskColumnId, setNewTaskColumnId] = useState<string | null>(null);
   const [showAddColumnInput, setShowAddColumnInput] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showBoardSettings, setShowBoardSettings] = useState(false);
 
   // Fetch board and tasks
   useEffect(() => {
@@ -121,11 +125,17 @@ export default function BoardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="btn-ghost">
+          <button 
+            className="btn-ghost"
+            onClick={() => setShowInviteModal(true)}
+          >
             <UserPlusIcon className="w-5 h-5 mr-2" />
             Share
           </button>
-          <button className="btn-ghost">
+          <button 
+            className="btn-ghost"
+            onClick={() => setShowBoardSettings(true)}
+          >
             <Cog6ToothIcon className="w-5 h-5" />
           </button>
         </div>
@@ -141,7 +151,7 @@ export default function BoardPage() {
 
       {/* Task Modal for creating new tasks */}
       {newTaskColumnId && (
-        <TaskDetailModal columnId={newTaskColumnId} />
+        <TaskDetailModal columnId={newTaskColumnId} onClose={() => setNewTaskColumnId(null)} />
       )}
 
       {/* Task Modal for editing (from Redux state) */}
@@ -183,6 +193,88 @@ export default function BoardPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Board Settings Modal */}
+      {showBoardSettings && (
+        <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Board Settings</h3>
+              <button
+                onClick={() => setShowBoardSettings(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Board Name
+                </label>
+                <input
+                  type="text"
+                  value={currentBoard?.name || ''}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={currentBoard?.description || ''}
+                  disabled
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white resize-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Columns
+                </label>
+                <div className="space-y-2">
+                  {currentBoard?.columns.map((column) => (
+                    <div key={column._id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      {column.color && (
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: column.color }}
+                        />
+                      )}
+                      <span className="text-sm">{column.name}</span>
+                      {column.taskLimit && (
+                        <span className="text-xs text-gray-500">
+                          (limit: {column.taskLimit})
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowBoardSettings(false)}
+                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Member Modal */}
+      {projectId && (
+        <InviteMemberModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          projectId={projectId}
+          onMemberAdded={() => dispatch(fetchProject(projectId))}
+        />
       )}
     </div>
   );
